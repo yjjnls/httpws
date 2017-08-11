@@ -1,0 +1,25 @@
+{
+  "name": "httpws",
+  "version": "0.0.1",
+  "description": "HTTP over Websokcet (for webservice)",
+  "main": "httpws.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mingyiz/httpws.git"
+  },
+  "keywords": [
+    "httpws",
+    "http",
+    "websocket",
+    "webservice"
+  ],
+  "author": "Mingyi Zhang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Mingyiz/httpws/issues"
+  },
+  "homepage": "https://github.com/Mingyiz/httpws"
+}
