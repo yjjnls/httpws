@@ -21,7 +21,7 @@
 
             $("#btnConnection").click(function() {
                 //实现化WebSocket对象，指定要连接的服务器地址与端口
-                socket = new WebSocket("ws://127.0.0.1:8080");
+                socket = new WebSocket("ws://127.0.0.1:8080/1234/ABCD");
                 //打开事件
                 socket.onopen = function() {
                     alert("Socket opend");
@@ -55,6 +55,7 @@
 				   +'Connection: Keep-Alive'+CRLF
 				   +'Cookie: PREF=ID=80a06da87be9ae3c:U=f7167333e2c3b714:NW=1:TM=1261551909:LM=1261551917:S=ybYcq2wpfefs4V9g;NID=31=ojj8d-IygaEtSxLgaJmqSjVhCspkviJrB6omjamNrSm8lZhKy_yMfO2M4QMRKcH1g0iQv9u-2hfBW7bUFwVh7pGaRUb0RnHcJU37y-FxlRugatx63JLv7CWMD6UB_O_r'+CRLF
 				   + 'NullOne:' +CRLF
+				   + 'CSeq: 100' +CRLF
 				   + CRLF
 				   + 'HERE IS BODY PART';
 				  socket.send(msg); 
