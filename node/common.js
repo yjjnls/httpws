@@ -20,21 +20,13 @@
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 'use strict';
-/*
-const binding = process.binding('http_parser');
-const methods = binding.methods;
-const HTTPParser = binding.HTTPParser;
-*/
-/*
-const FreeList = require('./internal/freelist');
-const ondrain = require('./internal/http').ondrain;*/
-const incoming = require('./_http_incoming');
-//const emitDestroy = require('async_hooks').emitDestroy;
+const timers = require('timers');
+const incoming = require('./incoming');
 const IncomingMessage = incoming.IncomingMessage;
 const readStart = incoming.readStart;
 const readStop = incoming.readStop;
 
-const debug = require('util').debuglog('http');
+const debug = require('util').debuglog('httpws');
 
 /**
  * Verifies that the given val is a valid HTTP token
@@ -155,6 +147,20 @@ function checkInvalidHeaderChar(val) {
   return false;
 }
 
+
+var dateCache;
+function utcDate() {
+  if (!dateCache) {
+    const d = new Date();
+    dateCache = d.toUTCString();
+    timers.enroll(utcDate, 1000 - d.getMilliseconds());
+    timers._unrefActive(utcDate);
+  }
+  return dateCache;
+}
+utcDate._onTimeout = function() {
+  dateCache = undefined;
+};
 module.exports = {
   _checkInvalidHeaderChar: checkInvalidHeaderChar,
   _checkIsHttpToken: checkIsHttpToken,
@@ -162,4 +168,6 @@ module.exports = {
   continueExpression: /(?:^|\W)100-continue(?:$|\W)/i,
   CRLF: '\r\n',
   debug,
+  outHeadersKey: Symbol('httpws.outHeadersKey'),
+  utcDate
 };

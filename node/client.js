@@ -24,14 +24,14 @@
 const util = require('util');
 const url = require('url');
 const assert = require('assert').ok;
-const common = require('./_http_common');
+const common = require('./common');
 const httpSocketSetup = common.httpSocketSetup;
 const parsers = common.parsers;
 const freeParser = common.freeParser;
 const debug = common.debug;
-const OutgoingMessage = require('./_http_outgoing').OutgoingMessage;
+const OutgoingMessage = require('./outgoing').OutgoingMessage;
 const Buffer = require('buffer').Buffer;
-const outHeadersKey = require('./internal/http').outHeadersKey;
+const outHeadersKey = common.outHeadersKey;
 
 const Agent = require('./agent').Agent;
 const globalAgent = require('./agent').globalAgent;

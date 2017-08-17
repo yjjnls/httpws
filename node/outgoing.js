@@ -25,20 +25,15 @@ const assert = require('assert').ok;
 const Stream = require('stream');
 const EventEmitter = require('events').EventEmitter;
 const util = require('util');
-/*const internalUtil = require('internal/util');*/
-const internalHttp = require('./internal/http');
 const Buffer = require('buffer').Buffer;
-const common = require('./_http_common');
+const common = require('./common');
 const checkIsHttpToken = common._checkIsHttpToken;
 const checkInvalidHeaderChar = common._checkInvalidHeaderChar;
-const outHeadersKey = require('./internal/http').outHeadersKey;
-/*const async_id_symbol = process.binding('async_wrap').async_id_symbol;*/
-/*const nextTick = require('internal/process/next_tick').nextTick;*/
-/*const errors = require('internal/errors');*/
+const outHeadersKey = common.outHeadersKey;
 
 const CRLF = common.CRLF;
 const debug = common.debug;
-const utcDate = internalHttp.utcDate;
+const utcDate = common.utcDate;
 
 var RE_FIELDS =
   /^(?:Connection|Transfer-Encoding|Content-Length|Date|Expect|Trailer|Upgrade)$/i;

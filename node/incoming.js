@@ -23,7 +23,7 @@
 
 const util = require('util');
 //const Stream = require('stream');
-const common = require('./_http_common');
+const common = require('./common');
 const EventEmitter = require('events').EventEmitter;
 const debug = common.debug;
 const CRLF = common.CRLF;

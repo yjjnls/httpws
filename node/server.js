@@ -22,10 +22,10 @@
 'use strict';
 
 const util = require('util');
-const net = require('net');
-const HTTPParser = process.binding('http_parser').HTTPParser;
 const assert = require('assert').ok;
-const common = require('_http_common');
+const events = require('events');
+const ws = require('ws');
+const common = require('./common');
 const parsers = common.parsers;
 const freeParser = common.freeParser;
 const debug = common.debug;
@@ -33,10 +33,12 @@ const CRLF = common.CRLF;
 const continueExpression = common.continueExpression;
 const chunkExpression = common.chunkExpression;
 const httpSocketSetup = common.httpSocketSetup;
-const OutgoingMessage = require('_http_outgoing').OutgoingMessage;
-const { outHeadersKey, ondrain } = require('internal/http');
-const errors = require('internal/errors');
+const OutgoingMessage = require('./outgoing').OutgoingMessage;
+const IncomingMessage = require('./incoming').IncomingMessage;
+const outHeadersKey = common.outHeadersKey;
 
+const Agent = require('./agent').Agent;
+const globalAgent = require('./agent').globalAgent;
 const STATUS_CODES = {
   100: 'Continue',
   101: 'Switching Protocols',
@@ -102,7 +104,7 @@ const STATUS_CODES = {
   511: 'Network Authentication Required' // RFC 6585
 };
 
-const kOnExecute = HTTPParser.kOnExecute | 0;
+/*const kOnExecute = HTTPParser.kOnExecute | 0;*/
 
 
 function ServerResponse(req) {
@@ -118,7 +120,10 @@ function ServerResponse(req) {
     this.useChunkedEncodingByDefault = chunkExpression.test(req.headers.te);
     this.shouldKeepAlive = false;
   }
+  this.setHeader('CSeq',req.headers['CSeq'] || 0)
+  this.socket = req.socket;
 }
+
 util.inherits(ServerResponse, OutgoingMessage);
 
 ServerResponse.prototype._finish = function _finish() {
@@ -131,7 +136,7 @@ ServerResponse.prototype._finish = function _finish() {
 
 ServerResponse.prototype.statusCode = 200;
 ServerResponse.prototype.statusMessage = undefined;
-
+/*
 function onServerResponseClose() {
   // EventEmitter.emit makes a copy of the 'close' listeners array before
   // calling the listeners. detachSocket() unregisters onServerResponseClose
@@ -170,7 +175,7 @@ ServerResponse.prototype.detachSocket = function detachSocket(socket) {
   socket._httpMessage = null;
   this.socket = this.connection = null;
 };
-
+*/
 ServerResponse.prototype.writeContinue = function writeContinue(cb) {
   this._writeRaw('HTTP/1.1 100 Continue' + CRLF + CRLF, 'ascii', cb);
   this._sent100 = true;
@@ -186,7 +191,7 @@ function writeHead(statusCode, reason, obj) {
 
   statusCode |= 0;
   if (statusCode < 100 || statusCode > 999) {
-    throw new errors.RangeError('ERR_HTTP_INVALID_STATUS_CODE',
+    throw new Error('ERR_HTTP_INVALID_STATUS_CODE',
                                 originalStatusCode);
   }
 
@@ -214,7 +219,7 @@ function writeHead(statusCode, reason, obj) {
       }
     }
     if (k === undefined && this._header) {
-      throw new errors.Error('ERR_HTTP_HEADERS_SENT');
+      throw new Error('ERR_HTTP_HEADERS_SENT');
     }
     // only progressive api is used
     headers = this[outHeadersKey];
@@ -224,7 +229,7 @@ function writeHead(statusCode, reason, obj) {
   }
 
   if (common._checkInvalidHeaderChar(this.statusMessage))
-    throw new errors.Error('ERR_INVALID_CHAR', 'statusMessage');
+    throw new Error('ERR_INVALID_CHAR', 'statusMessage');
 
   var statusLine = 'HTTP/1.1 ' + statusCode + ' ' + this.statusMessage + CRLF;
 
@@ -258,39 +263,123 @@ ServerResponse.prototype.writeHeader = ServerResponse.prototype.writeHead;
 
 function Server(requestListener) {
   if (!(this instanceof Server)) return new Server(requestListener);
-  net.Server.call(this, { allowHalfOpen: true });
+  events.EventEmitter.call(this);
+  
 
   if (requestListener) {
     this.on('request', requestListener);
   }
 
+
   // Similar option to this. Too lazy to write my own docs.
   // http://www.squid-cache.org/Doc/config/half_closed_clients/
   // http://wiki.squid-cache.org/SquidFaq/InnerWorkings#What_is_a_half-closed_filedescriptor.3F
-  this.httpAllowHalfOpen = false;
+/*  this.httpAllowHalfOpen = false;
 
   this.on('connection', connectionListener);
 
   this.timeout = 2 * 60 * 1000;
   this.keepAliveTimeout = 5000;
   this._pendingResponseData = 0;
-  this.maxHeadersCount = null;
+  this.maxHeadersCount = null;*/
 }
-util.inherits(Server, net.Server);
+/*util.inherits(Server, net.Server);*/
+util.inherits(Server, events.EventEmitter);
 
-
+/*
 Server.prototype.setTimeout = function setTimeout(msecs, callback) {
   this.timeout = msecs;
   if (callback)
     this.on('timeout', callback);
   return this;
 };
+*/
 
+Server.prototype.listen = function _listen(port){
+  this.onconnection=null;
+  this.onclose=null;
 
+  var self = this;
+  var wss = new ws.Server({  
+        'port': port
+    });
+
+  wss.on('connection', function( ws, request  ){
+
+    var onconnection = self.onconnection || self._onconnection;
+    console.log(self.onconnection,"--",self._onconnection);
+    if( !onconnection(ws,request)){
+      debug('connection repeted at',request.url);
+      ws.send('POST /connection-repeated@'+request.url);
+      ws.close();
+      return;
+    }
+
+    ws.on('message',function(data,flags){
+
+      //var incoming = _parseIncommingMessage( data );
+      var incoming = _parseIncommingMessage( data ,ws);
+      if( incoming && incoming.method ){
+
+        var req = incoming;
+        var res = new ServerResponse( incoming );
+        self.emit('request',req,res);
+        if( req._body ){
+          req.emit('data',req._body)
+        }
+        req.emit('end');
+
+      }
+    });
+  });
+
+  wss.on('close',function(){
+    if( self.onclose ){
+      self.onclose(ws)
+    } 
+  });
+};
+
+Server.prototype._onconnection = function _onconnection( socket, request ,url2name){
+
+  var name = url2name ? url2name(request.url) : request.url.slice(1);
+
+  return globalAgent.addConnection(name,socket,this);
+}
+
+function _parseIncommingMessage( data ,ws){
+  var n = data.indexOf(CRLF);
+  if ( n == -1 ){
+    debug('Invalid incoming message (without CRLF).')
+    return null;
+  }
+
+  var firstLine = data.slice(0,n).toString();
+
+  var fields = firstLine.split(' ');
+  if( fields.length == 3 &&  
+      (0 == fields[0].indexOf("HTTP/1") || 
+       0 == fields[2].indexOf("HTTP/1"))){
+         
+       // var incoming = new IncomingMessage( null );
+        var incoming = new IncomingMessage( ws );
+        if ( incoming.parseFirstLine(fields) &&
+             incoming.parse(data.slice(n+2))){
+          return incoming;
+        }
+  } else{
+    debug('Invalid request/response line : ',firstline)
+  }
+  return null;
+}
+
+/* 
 function connectionListener(socket) {
-  debug('SERVER new http connection');
+  debug('SERVER new websocket connection');
 
-  httpSocketSetup(socket);
+ 
+
+ httpSocketSetup(socket);
 
   // Ensure that the server property of the socket is correctly set.
   // See https://github.com/nodejs/node/issues/13435
@@ -660,10 +749,10 @@ function socketOnWrap(ev, fn) {
 
   return res;
 }
-
+*/
 module.exports = {
   STATUS_CODES,
   Server,
   ServerResponse,
-  _connectionListener: connectionListener
+  //_connectionListener: connectionListener
 };

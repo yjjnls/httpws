@@ -4,11 +4,12 @@
 'use strict';
 
 
-const client = require('./client');
-const common = require('./_http_common');
-const incoming = require('./_http_incoming');
-const outgoing = require('./_http_outgoing');
-const server = require('./_http_server');
+const client   = require('./client');
+const common   = require('./common');
+const incoming = require('./incoming');
+const outgoing = require('./outgoing');
+const server   = require('./server');
+const agent    = require('./agent');
 
 const Server = server.Server;
 const ClientRequest = client.ClientRequest;
@@ -31,9 +32,8 @@ function get(options, cb) {
 
 module.exports = {
   _connectionListener: server._connectionListener,
-  //METHODS: common.methods.slice().sort(),
   STATUS_CODES: server.STATUS_CODES,
-  //Agent: agent.Agent,
+  Agent: agent.Agent,
   ClientRequest,
   IncomingMessage: incoming.IncomingMessage,
   OutgoingMessage: outgoing.OutgoingMessage,

@@ -3,7 +3,8 @@
 const net = require('net');
 const util = require('util');
 const EventEmitter = require('events');
-const debug = util.debuglog('http');
+const common = require('./common');
+const debug = common.debug;
 
 var _request_counter=1;
 function Agent() {

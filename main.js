@@ -1,4 +1,5 @@
-httpws = require('./lib/http')
+httpws = require('./node/httpws')
+
 httpws.createServer( function( req, res){
 
     req.on('data',function (data) {
