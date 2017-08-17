@@ -1,9 +1,6 @@
 httpws = require('./lib/http')
-
 httpws.createServer( function( req, res){
-    console.log('got request !');
-    console.log(req.headers);
-    console.log(req.url);
+
     req.on('data',function (data) {
         console.log('receive data\n',data);
     });
@@ -21,8 +18,13 @@ httpws.createServer( function( req, res){
         res.write("</body>");
         res.write("</html>");
         res.end();
+
+        request = httpws.request('http://abc/COMEON');
+        request.write('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+        request.end();
+    
     });
 
-    res.end();
+//    res.end();
 
 }).listen(8080);

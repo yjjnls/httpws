@@ -2,7 +2,7 @@
   "name": "httpws",
   "version": "0.0.1",
   "description": "HTTP over Websokcet (for webservice)",
-  "main": "httpws.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
