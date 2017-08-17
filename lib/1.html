@@ -21,7 +21,7 @@
 
             $("#btnConnection").click(function() {
                 //实现化WebSocket对象，指定要连接的服务器地址与端口
-                socket = new WebSocket("ws://127.0.0.1:8080/1234/ABCD");
+                socket = new WebSocket("ws://127.0.0.1:8080/abc");
                 //打开事件
                 socket.onopen = function() {
                     alert("Socket opend");
