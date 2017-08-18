@@ -72,26 +72,33 @@ function validateHost(host, name) {
   return host;
 }
 
-function url2options(urlx){
+function url2options(Url){
   //find virtual hostname {xxxx}
+  var line = Url;
   var xpath=null;
-  var begin = urlx.indexOf('://{');
+  var begin = line.indexOf('://{');
   if( begin != -1){
-    var end =urlx.indexOf('}');
+    var end =line.indexOf('}');
     if( end == -1 ){
-      debug('invalid url(without }end for hostname) :',urlx);
+      debug('invalid url(without }end for hostname) :',line);
       return null;
     }
-    xpath = urlx.slice(begin+1,end);
-    urlx[begin+3]='.';
-    urlx[end]='.';
+    xpath = line.slice(begin+4,end);
+    line= line.slice(0,begin+3) + '.' + line.slice(end+1);
   }
 
-  var options = url.parse(urlx);
+  var options = url.parse(line);
 
   if( xpath ){
     options.host = xpath;
-    options.hostname = '.'
+    options.hostname = null;
+    var href = options.href 
+    if( href ){
+      var n = href.indexOf('://./');
+      if( n != -1){
+        options.href = href.slice(0,n +3) +`{${xpath}}` + href.slice(n +4);
+      }
+    }
   } else{
     options.host = options.hostname    
   }
@@ -102,7 +109,7 @@ function ClientRequest(options, cb) {
 
   if (typeof options === 'string') {
     options = url2options(options);
-    if (!options.hostname) {
+    if (options.hostname !== null && !options.hostname) {
       throw new Error('ERR_INVALID_DOMAIN_NAME');
     }
     console.log('ClientRequest options:',options);
@@ -235,7 +242,8 @@ function ClientRequest(options, cb) {
 
   var called = false;
 
-  globalAgent.addRequest( this);
+  globalAgent.addRequest( { request :this, callback:cb} );
+
 /*
   var oncreate = (err, socket) => {
     if (called)

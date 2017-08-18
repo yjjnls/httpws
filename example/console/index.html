@@ -62,8 +62,9 @@ font-size:1em;
 	<br>
 	<input type="button" onclick="Send()" value="send message">
 	<textarea id="out_message" class="textarea"  style="font-size:1em;"
-	rows = "10">POST /Hello
+	rows = "10">POST /Hello HTTP/1.1
 CSeq: 1
+Content-Type: text/plain
 
 Here is body!</textarea>
 	</div>

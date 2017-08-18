@@ -34,6 +34,7 @@ module.exports = {
   _connectionListener: server._connectionListener,
   STATUS_CODES: server.STATUS_CODES,
   Agent: agent.Agent,
+  globalAgent: agent.globalAgent,
   ClientRequest,
   IncomingMessage: incoming.IncomingMessage,
   OutgoingMessage: outgoing.OutgoingMessage,

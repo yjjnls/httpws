@@ -13,6 +13,30 @@ var btnDisconnect  = document.getElementById('btnDisconnect');
 labelElement.innerText="========    "+getNowFormatDate()+"    ========";
 btnDisconnect.disabled= true;
 
+function tohttpstr(buf){
+    var n = buf.indexOf('\n\n');
+    var header = buf.value;
+    var body = null;
+    if( n !== -1 ){
+        header = buf.slice(0,n);
+        body = buf.slice(n+2);
+    }
+    var lines = header.split('\n');
+    header='';
+    for(var i = 0; i < lines.length; i++){
+        var line =lines[i];
+        header +=line + '\r\n';
+    }
+    header +='Content-Lenght: ' + (body ? body.length : 0)+'\r\n';
+    header +='\r\n';
+    return body ? header+body : header;
+
+}
+tohttpstr(messageElement.value );
+
+
+
+
 function getNowFormatDate() {
     var date = new Date();
     var seperator1 = "-";
@@ -57,34 +81,15 @@ function Clear()
 {
 	
     var label = document.getElementById('in_message');
-	label.innerText ="$"
-
-    //let header_elements = document.getElementsByName('request_header');
-    //
-    //let body_elements = document.getElementsByName('request_body');
-    //
-    //fetch(url_elements[0].value, {
-    //    method: "POST",
-    //    headers: header_elements[0].value,
-    //    body: body_elements[0].value
-    //}).then(function(res) {
-    //    if (res.ok) {
-    //        document.getElementById('res').innerText = res;
-    //    } else if (res.status == 401) {
-    //        alert("Oops! You are not authorized.");
-    //    }
-    //}, function(e) {
-    //    alert("Error submitting form!");
-    //});
-
-
+	label.innerText ="";
 }
 
 function Send(){
     if( socket){
-        socket.send( messageElement.value );
+        var msg = tohttpstr(messageElement.value)
+        socket.send( msg );
+        console.log(msg);
     }
-	console.log(socket, messageElement.value);
 
 }
 

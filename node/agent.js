@@ -18,8 +18,8 @@ function Agent() {
   self.defaultPort = 80;
   self.protocol = 'http:';
 
-  self.requests = {};
-  self.connections = {};
+//  self.requests = {};
+  self.connections = [];
 
   self.on('free', function(socket) {
     var name = self.getName(options);
@@ -33,29 +33,33 @@ Agent.prototype.addConnection = function addConnection(name,socket, server){
   if( this.connections[name]){
     return false;
   }
-  this.connections[name]={
+  this.connections.push({
     name,
     socket,
     server,
     requests:{}
-  };
+  });
   return true;
 }
 
+Agent.prototype.getConnection = function getConnection(name) {
+  for(var i=0; i < this.connections.length; i++){
+    if( this.connections[i].name === name ){
+      return this.connections[i];
+    }
+  }
+  return null;
+}
 
-Agent.prototype.addRequest = function addRequest(req) {
-  // Legacy API: addRequest(req, host, port, localAddress)
-  //if (typeof options === 'string') {
-  //  options = {
-  //    host: options
-  //  };
-  //}
+Agent.prototype.addRequest = function addRequest(request) {
+  var req = request.request;
+  var cb = req.callback;
 
   var host = req.getHeader('host')
   if( !host ){
     throw new Error('NOHOST_IN_REQUEST');
   }
-  var connection = this.connections[host];
+  var connection = this.getConnection(host);
   if( !connection ){
     throw new Error('REQUEST_TO_NOT_ESTABLISHED_CONNECT');    
   }
@@ -63,9 +67,17 @@ Agent.prototype.addRequest = function addRequest(req) {
   var id = ++_request_counter ? _request_counter : _request_counter=1;
   req.setHeader('CSeq',id);
   req.socket = connection.socket;
-  connection.requests[id]=req;
+  connection.requests[id]=request;
 };
 
+Agent.prototype.getConnectionByReqId = function getConnectionByReqId(id) {
+  for(var i=0; i < this.connections.length; i++){
+    if( this.connections[i].requests[id]){
+      return this.connections[i];
+    }
+  }
+  return null;
+}
 module.exports = {
   Agent,
   globalAgent: new Agent()
