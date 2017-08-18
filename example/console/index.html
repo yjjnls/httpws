@@ -35,7 +35,6 @@ font-size:1em;
 }
 .textarea{
 background-color:#FFFFFF;
-display:block;
 line-height:20px;
 color:#000000;
 text-align:left;
@@ -50,12 +49,12 @@ font-size:1em;
 </head>
 <body>
 
-    <div style="float:top;hight:16px;text-align:center;vertical-align:middle;font-size:2em" > HTTPWS Test Console </div>
+    <div style="float:top;text-align:center;vertical-align:middle;font-size:2em" > HTTPWS Test Console </div>
 	<div >
 		
 		<input type="button" id="btnConnect" style="font-size:1em;float:left;width:80px;" onclick="OnButtonConnect()" value="connect">
 		<input id="url"  style="font-size:1em;float:middle;height:16px;width:60%" value="ws://localhost:8080/endpoint-1">
-		<input type="button"  id="btnDisconnect" style="font-size:1em;font-color:FF0000;width:100px;" onclick="OnButtonDisconnect()" value="disconnect">
+		<input type="button"  id="btnDisconnect" style="font-size:1em;color:FF0000;width:100px;" onclick="OnButtonDisconnect()" value="disconnect">
 	</div>
 	
 
@@ -63,7 +62,10 @@ font-size:1em;
 	<br>
 	<input type="button" onclick="Send()" value="send message">
 	<textarea id="out_message" class="textarea"  style="font-size:1em;"
-	rows = "10">Client Request Body!</textarea>
+	rows = "10">POST /Hello
+CSeq: 1
+
+Here is body!</textarea>
 	</div>
 	
 		<div class="text">

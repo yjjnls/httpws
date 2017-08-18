@@ -1,5 +1,6 @@
-httpws = require('./node/httpws')
+httpws = require('../../node/httpws')
 
+console.log("HTTPWS Console Server")
 httpws.createServer( function( req, res){
 
     var body;
