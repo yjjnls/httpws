@@ -316,6 +316,8 @@ Server.prototype.listen = function _listen(port){
     }
 
     ws.on('message',function(data,flags){
+      console.log("receive message:\n"+data);
+      debug("receive message:\n"+data);
 
       //var incoming = _parseIncommingMessage( data );
       var incoming = _parseIncommingMessage( data ,ws);
