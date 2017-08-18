@@ -48,6 +48,14 @@ class HttpWsClient {
         this.clientServer = new ClientServer(cb);
     }
 
+    close() {
+        if(this.ws) {
+            this.ws.close();
+        }
+        this.requests.clear();
+        this.clientServer = null;
+    }
+
 }
 
 function onError(err) {
@@ -80,7 +88,7 @@ function onMessage(event) {
                 req.onResponse(httpStruct.content, response);
                 // this.requests.delete(this.requestId);
             }
-        } else {
+        } else if(this.clientServer){
             let obj = parseFirstLine(httpStruct.firstLine);
             let options = {path: obj.path, method: obj.method, headers: httpStruct.headers};
             let request = new Request(options);
