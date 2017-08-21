@@ -239,11 +239,15 @@ function normalizeName(name) {
     if (/[^a-z0-9\-#$%&'*+.\^_`|~]/i.test(name)) {
         throw new TypeError('Invalid character in header field name')
     }
-    return name.toLowerCase()
+    return name;
+    return name.toLowerCase();
 }
 
 function normalizeValue(value) {
-    if (typeof value !== 'string') {
+    if (typeof  value === 'number') {
+        console.log('number value:' + value);
+        return value;
+    } else if (typeof value !== 'string') {
         value = String(value)
     }
     return value
@@ -423,6 +427,10 @@ class Request extends EventEmitter {
 
 
     addBody(body) {
+        if(this.method.toUpperCase() === 'GET')
+        {
+            return;
+        }
         this._initBody(body);
     }
 
@@ -488,6 +496,10 @@ class Response extends EventEmitter {
     }
 
     addBody(body) {
+        if(this.method.toUpperCase() === 'GET')
+        {
+            return;
+        }
         this._initBody(body);
     }
 

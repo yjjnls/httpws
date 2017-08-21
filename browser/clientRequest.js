@@ -38,7 +38,7 @@ ClientRequest.prototype.end = function _end(data) {
     if (this.ws.readyState === WebSocket.OPEN){
         let buf = str2ab(request);
         let str = ab2str(buf);
-        this.ws.send(buf);
+        this.ws.send(request);
         this.req.resetBody();
     }
     else
