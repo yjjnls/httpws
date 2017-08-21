@@ -319,7 +319,7 @@ Server.prototype.listen = function _listen(port){
       console.log("receive message:\n"+data);
       debug("receive message:\n"+data);
 
-      //var incoming = _parseIncommingMessage( data );
+      //the imcoming request send by remote
       var incoming = _parseIncommingMessage( data ,ws);
       if( incoming && incoming.method ){
 
@@ -332,6 +332,7 @@ Server.prototype.listen = function _listen(port){
         req.emit('end');
 
       }
+      //the incoming response after sending request to remote
       else if( incoming && incoming.statusCode ){
         var res = incoming;
         var id  = res.headers['cseq'];
@@ -357,13 +358,21 @@ Server.prototype.listen = function _listen(port){
 
       }
     });
+    ws.on('close',function(){
+      // console.log('ws close');
+      var incoming = new IncomingMessage( ws );
+      var req = incoming;
+      var res = new ServerResponse( incoming );
+      self.emit('request',req,res);
+      req.emit('close');
+    });
   });
 
-  wss.on('close',function(){
-    if( self.onclose ){
-      self.onclose(ws)
-    } 
-  });
+  // wss.on('close',function(){
+  //   if( self.onclose ){
+  //     self.onclose(ws)
+  //   } 
+  // });
 };
 
 Server.prototype._onconnection = function _onconnection( server,socket, request ,url2name){
