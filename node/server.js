@@ -120,7 +120,7 @@ function ServerResponse(req) {
     this.useChunkedEncodingByDefault = chunkExpression.test(req.headers.te);
     this.shouldKeepAlive = false;
   }
-  this.setHeader('CSeq',req.headers['CSeq'] || 0)
+  this.setHeader('CSeq',req.headers['cseq'] || 0)
   this.socket = req.socket;
 }
 
