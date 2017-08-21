@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>HTTPWS Test Conole</title>
+<style>
+<!-- body{ margin:0; height:100%} -->
+body{
+       font-family:Arial,Helvetica,sans-serif;
+       font-size:1em;
+       vertical-align:middle;
+       font-weight:normal;
+	   background-color:#CCCCCC;
+	   margin:16px;
+      }
+	  
+html{ height:100%}
+.top{width:100%;height:48px; float:top}
+.url{width:80%;height:16px}
+.text{width:100%;
+       font-family:Arial,Helvetica,sans-serif;
+       font-size:1em;
+       vertical-align:top;
+	   text-align:left;
+       font-weight:normal
+}
+
+.label{
+background-color:#000000;
+display:block;
+color:#00BB00;
+text-align:left;
+vertical-align:text-top;
+font-size:1em;
+}
+.textarea{
+background-color:#FFFFFF;
+line-height:20px;
+color:#000000;
+text-align:left;
+vertical-align:text-top;
+width:100%;
+font-size:1em;
+	
+}
+
+</style>
+
+</head>
+<body>
+
+    <div style="float:top;text-align:center;vertical-align:middle;font-size:2em" > HTTPWS Test Console </div>
+	<div >
+		
+		<input type="button" id="btnConnect" style="font-size:1em;float:left;width:80px;" onclick="OnButtonConnect()" value="connect">
+		<input id="url"  style="font-size:1em;float:middle;height:16px;width:60%" value="ws://localhost:8080/endpoint-1">
+		<input type="button"  id="btnDisconnect" style="font-size:1em;color:FF0000;width:100px;" onclick="OnButtonDisconnect()" value="disconnect">
+	</div>
+	
+
+	<div>
+	<br>
+	<input type="button" onclick="Send()" value="send message">
+	<textarea id="out_message" class="textarea"  style="font-size:1em;"
+	rows = "10">POST /Hello HTTP/1.1
+CSeq: 1
+Content-Type: text/plain
+
+Here is body!</textarea>
+	</div>
+	
+		<div class="text">
+	<br>
+	<input type="button" onclick="Clear()" value="clear message">
+	<label id="in_message" class="label">!</label>
+	
+	</div>
+	<script src="main.js"></script>
+</body>
+</html>

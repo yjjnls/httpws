@@ -308,7 +308,7 @@ Server.prototype.listen = function _listen(port){
 
     var onconnection = self.onconnection || self._onconnection;
     console.log(self.onconnection,"--",self._onconnection);
-    if( !onconnection(ws,request)){
+    if( !onconnection(self,ws,request)){
       debug('connection repeted at',request.url);
       ws.send('POST /connection-repeated@'+request.url);
       ws.close();
@@ -316,6 +316,8 @@ Server.prototype.listen = function _listen(port){
     }
 
     ws.on('message',function(data,flags){
+      console.log("receive message:\n"+data);
+      debug("receive message:\n"+data);
 
       //var incoming = _parseIncommingMessage( data );
       var incoming = _parseIncommingMessage( data ,ws);
@@ -330,6 +332,30 @@ Server.prototype.listen = function _listen(port){
         req.emit('end');
 
       }
+      else if( incoming && incoming.statusCode ){
+        var res = incoming;
+        var id  = res.headers['cseq'];
+        if( !id ){
+          debug('Invalid response message (without CSeq field).');
+          return;
+        }
+
+        id = Number(id.split(' ')[0]);
+        var c = globalAgent.getConnectionByReqId(id);
+        if( !c){
+          debug('Invalid response message ( no correspoining request in the pool.');
+          return;
+        }
+
+        var creq = c.requests[id];
+        if( creq.callback ){
+          creq.callback( res );
+          res.emit('data',res._body);
+          res.emit('end');
+        }
+        delete c.requests[id];
+
+      }
     });
   });
 
@@ -340,11 +366,11 @@ Server.prototype.listen = function _listen(port){
   });
 };
 
-Server.prototype._onconnection = function _onconnection( socket, request ,url2name){
+Server.prototype._onconnection = function _onconnection( server,socket, request ,url2name){
 
   var name = url2name ? url2name(request.url) : request.url.slice(1);
 
-  return globalAgent.addConnection(name,socket,this);
+  return globalAgent.addConnection(name,socket,server);
 }
 
 function _parseIncommingMessage( data ,ws){
@@ -368,7 +394,7 @@ function _parseIncommingMessage( data ,ws){
           return incoming;
         }
   } else{
-    debug('Invalid request/response line : ',firstline)
+    debug('Invalid request/response line : ',firstLine)
   }
   return null;
 }
