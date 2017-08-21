@@ -295,14 +295,12 @@ Server.prototype.setTimeout = function setTimeout(msecs, callback) {
 };
 */
 
-Server.prototype.listen = function _listen(port){
+Server.prototype.listen = function _listen(options){
   this.onconnection=null;
   this.onclose=null;
 
   var self = this;
-  var wss = new ws.Server({  
-        'port': port
-    });
+  var wss = new ws.Server(options);
 
   wss.on('connection', function( ws, request  ){
 
