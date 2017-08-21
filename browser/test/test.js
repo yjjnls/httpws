@@ -4,16 +4,18 @@ const options = {
     port: 8080
 };
 
-let wsEndPoint = new HttpWsClient(options);
+let wsTunnel = new HttpWsConnection(options);
 
-let request_client = wsEndPoint.CreateClientRequest({ method: 'post', path: '/', headers: {
+wsTunnel.addServiceListener(function (request, response) {
+    console.log(request, response.write('nihao'));
+    response.end(' baibai')
+});
+
+let request_client = wsTunnel.createClientRequest({ method: 'post', path: '/', headers: {
     date: new Date()
 }}, res => {
     res.on('data', (message) => {
         console.log('data: ' + message);
-        if(request_client) {
-            console.log('still exists');
-        }
     });
 
     res.on('end', message => {
@@ -28,8 +30,3 @@ function send() {
     request_client.write('hello ');
     request_client.end('world');
 }
-
-let clientServer = wsEndPoint.CreateClientServer(function (request, response) {
-    console.log(request, response.write('nihao'));
-    response.end(' baibai')
-});
