@@ -1,5 +1,5 @@
 
-class HttpWsClient {
+class HttpWsConnection {
     constructor(options) {
         if (typeof options === 'string')
         {
@@ -24,40 +24,49 @@ class HttpWsClient {
             throw new Error('Unable to connect to the domain name');
         }
         this.requests = new Map();
-        this.clientServer = null;
+        this.service = null;
     }
 
-    _AddRequest(requestId, request) {
+    _addRequest(requestId, request) {
         this.requests.set(requestId, request);
     }
 
-    CreateClientRequest(options, cb) {
+    createClientRequest(options, cb) {
         let req = new Request(options);
         let clientRequest = new ClientRequest(this.ws, req, cb);
         req.headers.set('request-id',clientRequest.getRequestId());
         this.requestId = clientRequest.getRequestId();
-        this._AddRequest(clientRequest.getRequestId(), clientRequest);
+        this._addRequest(clientRequest.getRequestId(), clientRequest);
         return clientRequest;
     }
 
-    CreateClientServer(cb) {
-        if(this.clientServer) {
-            console.log('Client Server has been created!');
-            return;
+    addServiceListener(cb) {
+        if(this.service) {
+            this.service.addRequestListener(cb);
+        } else {
+            console.log('Client service has not been created!');
         }
-        this.clientServer = new ClientServer(cb);
+    }
+
+    close() {
+        if(this.ws) {
+            this.ws.close();
+        }
+        this.requests.clear();
+        this.service = null;
     }
 
 }
 
 function onError(err) {
     this.requests.clear();
-    this.clientServer = null;
+    this.service = null;
     throw err;
 }
 
 function onOpen() {
     console.log('Connected to the server');
+    this.service = new ClientService();
 }
 
 function onMessage(event) {
@@ -80,29 +89,13 @@ function onMessage(event) {
                 req.onResponse(httpStruct.content, response);
                 // this.requests.delete(this.requestId);
             }
-        } else {
+        } else if(this.service){
             let obj = parseFirstLine(httpStruct.firstLine);
             let options = {path: obj.path, method: obj.method, headers: httpStruct.headers};
             let request = new Request(options);
             let response = new Response(this.ws, {headers: {'request-id': id}});
-            this.clientServer.emit('request', request, response);
+            this.service.emit('request', request, response);
         }
-    }
-}
-
-function parseFirstLine(firstLine) {
-    let method = firstLine.substring(0, firstLine.indexOf(' '));
-    let path = firstLine.substring(firstLine.indexOf(' ') + 1, firstLine.lastIndexOf(' '));
-    return {method: method, path: path};
-}
-
-function isResponse(firstLine) {
-    if(firstLine.toUpperCase().startsWith('HTTP'))
-    {
-        return true;
-    }
-    else {
-        return false;
     }
 }
 
@@ -119,6 +112,6 @@ function onClose(event) {
             "(Code: " + code + ")";
     }
     this.requests.clear();
-    this.clientServer = null;
+    this.service = null;
     console.log(str);
 }
