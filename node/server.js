@@ -360,6 +360,7 @@ Server.prototype.listen = function _listen(port){
     });
     ws.on('close',function(){
       // console.log('ws close');
+      globalAgent.removeConnection(ws);
       var incoming = new IncomingMessage( ws );
       var req = incoming;
       var res = new ServerResponse( incoming );
