@@ -321,12 +321,14 @@ Server.prototype.listen = function _listen(options){
       console.log("receive message:\n"+data);
       debug("receive message:\n"+data);
 
+
       var incoming = _parseIncommingMessage( data ,ws);
       let cseq = incoming.headers['cseq'];
       if(cseq === undefined) {
         ws.send('POST /header-notFound@cseq');
         return;
       }
+
       let firstLine = data.split(/\r?\n/)[0];
       if(isResquest(firstLine)) {
 
@@ -343,7 +345,7 @@ Server.prototype.listen = function _listen(options){
                     console.log('Error: ' + e.message);
                   }
               } else {
-                  ws.send('POST /connection-notFound@'+host);
+                  ws.send('POST /Host connection-notFound@'+host);
                   return;
               }
           }
@@ -396,18 +398,18 @@ Server.prototype.listen = function _listen(options){
       //var incoming = _parseIncommingMessage( data );
 
     });
-      ws.on('close',function(){
-        console.log('close ws: ' + (++self.count));
-          if( self.onClose ){
-              self.onClose(ws)
-          }
-      });
 
+    ws.on('close',function(){
+      // console.log('ws close');
+      globalAgent.removeConnection(ws);
+/*      var incoming = new IncomingMessage( ws );
+      var req = incoming;
+      var res = new ServerResponse( incoming );
+      self.emit('request',req,res);
+      req.emit('close');*/
+    });
   });
-};
 
-Server.prototype.onClose = function (ws) {
-    return globalAgent.deleteConnection(ws);
 };
 
 Server.prototype._onconnection = function _onconnection( server,socket, request ,url2name){
