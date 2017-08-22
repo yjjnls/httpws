@@ -7,6 +7,7 @@ function ClientRequest(ws, req, cb) {
     this.cb = cb;
     this.req = req;
     this.ws = ws;
+    this.sent = false;
 }
 
 ClientRequest.prototype.getRequestId = function(){
@@ -33,13 +34,16 @@ ClientRequest.prototype.write = function _write(data) {
 };
 
 ClientRequest.prototype.end = function _end(data) {
+    if(this.sent) {
+        throw new Error('Request can not be sent again!');
+    }
     this.req.addBody(data);
     let request = this.req.constructHttpMessage();
     if (this.ws.readyState === WebSocket.OPEN){
         let buf = str2ab(request);
         let str = ab2str(buf);
         this.ws.send(request);
-        this.req.resetBody();
+        this.sent = true;
     }
     else
     {
