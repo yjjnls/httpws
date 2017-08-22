@@ -24,7 +24,7 @@ ClientRequest.prototype.onResponse = function _onMessage(data, res) {
     if(this.cb && res) {
         this.cb(res);
         res.emit('data', str);
-        res.emit('end', str);
+        res.emit('end');
     }
 };
 
@@ -46,3 +46,7 @@ ClientRequest.prototype.end = function _end(data) {
         throw new Error('Socket not opened');
     }
 };
+
+ClientRequest.prototype.getHeaders = function () {
+    return this.req.getHeaders();
+}

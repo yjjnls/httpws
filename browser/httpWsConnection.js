@@ -78,7 +78,7 @@ function onMessage(event) {
     let str;
     if (typeof event.data === 'string') {
         str = event.data;
-        console.log(event.data);
+        //console.log(event.data);
     } else if (event.data instanceof ArrayBuffer) {
         let buffer = event.data;
         str = ab2str(buffer);
@@ -86,7 +86,7 @@ function onMessage(event) {
     //此处解析消息，判断是请求还是应答，若是请求则构建request和response，则调用ClientServer的emit request函数
     //若是应答则根据id找到对应client request 然后在通过request的onMessage函数给发送消息
     let httpStruct = httpParse(str);
-    let id = httpStruct.headers.get('request-id');
+    let id = httpStruct.headers.get('CSeq');
     if(isResponse(httpStruct.firstLine))
     {
         let req = this.requests.get(Number.parseInt(id));

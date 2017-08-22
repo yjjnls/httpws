@@ -245,7 +245,6 @@ function normalizeName(name) {
 
 function normalizeValue(value) {
     if (typeof  value === 'number') {
-        console.log('number value:' + value);
         return value;
     } else if (typeof value !== 'string') {
         value = String(value)
@@ -447,6 +446,14 @@ class Request extends EventEmitter {
     resetBody() {
         this._resetBody();
     }
+
+    getHeaders() {
+        let obj = {};
+        for(let [key, value] of this.headers.entries()) {
+            obj[key.toLowerCase()] = value;
+        }
+        return obj;
+    }
 }
 
 Body.call(Request.prototype);
@@ -607,4 +614,24 @@ function isResponse(firstLine) {
     else {
         return false;
     }
+}
+
+function isJSON(str) {
+    if (typeof str == 'string') {
+        try {
+            var obj=JSON.parse(str);if(str.indexOf('{')>-1) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch(e) {
+            console.log(e);
+            return false;
+        }
+    }
+    return false;
+}
+
+function trim(str) {
+    return str.replace(/^(\s|\u00A0)+/,'').replace(/(\s|\u00A0)+$/,'');
 }
