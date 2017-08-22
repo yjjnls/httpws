@@ -20,6 +20,7 @@ class HttpWsConnection {
 
                 this.ws.onclose = onClose.bind(this);
             }
+            this.path = path.substring(1) || '';
         }
         else {
             throw new Error('Unable to connect to the domain name');
@@ -50,12 +51,17 @@ class HttpWsConnection {
         }
     }
 
+    removeServiceListener(cb) {
+        this.service.removeRequestListener(cb);
+    }
+
     close() {
         if(this.ws) {
             this.ws.close();
         }
         this.requests.clear();
         this.service = null;
+        this.onConnected = null;
     }
 
 }
@@ -78,7 +84,7 @@ function onMessage(event) {
     let str;
     if (typeof event.data === 'string') {
         str = event.data;
-        //console.log(event.data);
+        console.log('onMessage:\r\n' + event.data);
     } else if (event.data instanceof ArrayBuffer) {
         let buffer = event.data;
         str = ab2str(buffer);
@@ -92,16 +98,19 @@ function onMessage(event) {
         let req = this.requests.get(Number.parseInt(id));
         if(req)
         {
-            let response = new Response(this.ws, {headers: {'request-id': id}});
+            let response = new Response(this.ws, {headers: {'CSeq': id}});
             req.onResponse(httpStruct.content, response);
             // this.requests.delete(this.requestId);
         }
-    } else if(this.service){
+    } else if(isRequest(httpStruct.firstLine) && this.service){
         let obj = parseFirstLine(httpStruct.firstLine);
         let options = {path: obj.path, method: obj.method, headers: httpStruct.headers};
         let request = new Request(options);
-        let response = new Response(this.ws, {headers: {'request-id': id}});
+        request.addBody(httpStruct.content);
+        let response = new Response(this.ws, {headers: {'CSeq': id}});
         this.service.emit('request', request, response);
+    } else {
+        console.error(new Error(str));
     }
 }
 
@@ -119,5 +128,6 @@ function onClose(event) {
     }
     this.requests.clear();
     this.service = null;
+    this.onConnected = null;
     console.log(str);
 }

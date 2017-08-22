@@ -49,6 +49,15 @@ Agent.prototype.getConnection = function getConnection(name) {
     }
   }
   return null;
+};
+
+Agent.prototype.deleteConnection = function (socket) {
+    for(var i=0; i < this.connections.length; i++){
+        if( this.connections[i].socket === socket ){
+            this.connections.splice(i,1);
+            return;
+        }
+    }
 }
 
 Agent.prototype.addRequest = function addRequest(request) {
@@ -61,7 +70,7 @@ Agent.prototype.addRequest = function addRequest(request) {
   }
   var connection = this.getConnection(host);
   if( !connection ){
-    throw new Error('REQUEST_TO_NOT_ESTABLISHED_CONNECT');    
+    throw new Error('REQUEST_TO_NOT_ESTABLISHED_CONNECT');
   }
 
   var id = ++_request_counter ? _request_counter : _request_counter=1;

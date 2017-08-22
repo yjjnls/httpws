@@ -169,5 +169,27 @@ module.exports = {
   CRLF: '\r\n',
   debug,
   outHeadersKey: Symbol('httpws.outHeadersKey'),
-  utcDate
+  utcDate,
+  isResponse,
+  isRequest
 };
+
+function isResponse(firstLine) {
+    if (firstLine.toUpperCase().startsWith('HTTP'))
+    {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+function isRequest(firstLine) {
+    if (firstLine.toUpperCase().endsWith('HTTP/1.1') || firstLine.toUpperCase().endsWith('HTTP/1.0'))
+    {
+        return true;
+    }
+    else {
+        return false;
+    }
+}

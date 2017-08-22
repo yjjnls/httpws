@@ -42,10 +42,6 @@ function str2ab(str) {
     return buf;
 }
 
-let isFunction = function (obj) {
-    return typeof ojb === 'function' || false;
-}
-
 class EventEmitter {
     constructor() {
         this.listeners = new Map();
@@ -60,7 +56,7 @@ class EventEmitter {
         let index;
         if (listeners && listeners.length) {
             index = listeners.reduce((i, listener, index) => {
-                return (isFunction(listener) && listener === callback) ? i = index : i;
+                return (typeof listener === "function" && listener === callback) ? i = index : i;
             }, -1);
         }
         if (index > -1) {
@@ -503,10 +499,6 @@ class Response extends EventEmitter {
     }
 
     addBody(body) {
-        if(this.method.toUpperCase() === 'GET')
-        {
-            return;
-        }
         this._initBody(body);
     }
 
@@ -539,7 +531,7 @@ class Response extends EventEmitter {
         if (this.ws.readyState === WebSocket.OPEN){
             let buf = str2ab(response);
             let str = ab2str(buf);
-            this.ws.send(buf);
+            this.ws.send(response);
             this.resetBody();
         }
         else
@@ -616,6 +608,16 @@ function isResponse(firstLine) {
     }
 }
 
+function isRequest(firstLine) {
+    if (firstLine.toUpperCase().endsWith('HTTP/1.1') || firstLine.toUpperCase().endsWith('HTTP/1.0'))
+    {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 function isJSON(str) {
     if (typeof str == 'string') {
         try {
@@ -625,7 +627,7 @@ function isJSON(str) {
                 return false;
             }
         } catch(e) {
-            console.log(e);
+            console.log(e.message);
             return false;
         }
     }
