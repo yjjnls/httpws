@@ -30,9 +30,11 @@ function Agent() {
 util.inherits(Agent, EventEmitter);
 
 Agent.prototype.addConnection = function addConnection(name,socket, server){
-  if( this.connections[name]){
+
+  if(this.getConnection(name) != null){
     return false;
   }
+
   this.connections.push({
     name,
     socket,
@@ -40,6 +42,14 @@ Agent.prototype.addConnection = function addConnection(name,socket, server){
     requests:{}
   });
   return true;
+}
+
+Agent.prototype.removeConnection = function removeConnection(socket){
+  for(var i=0; i < this.connections.length; i++){
+    if( this.connections[i].socket==socket){
+      this.connections.splice(i,1);
+    }
+  }
 }
 
 Agent.prototype.getConnection = function getConnection(name) {
@@ -73,6 +83,14 @@ Agent.prototype.addRequest = function addRequest(request) {
 Agent.prototype.getConnectionByReqId = function getConnectionByReqId(id) {
   for(var i=0; i < this.connections.length; i++){
     if( this.connections[i].requests[id]){
+      return this.connections[i];
+    }
+  }
+  return null;
+}
+Agent.prototype.getConnectionBySocket = function getConnectionBySocket(socket) {
+  for(var i=0; i < this.connections.length; i++){
+    if( this.connections[i].socket==socket){
       return this.connections[i];
     }
   }
