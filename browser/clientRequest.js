@@ -24,7 +24,7 @@ ClientRequest.prototype.onResponse = function _onMessage(data, res) {
     if(this.cb && res) {
         this.cb(res);
         res.emit('data', str);
-        res.emit('end', str);
+        res.emit('end');
     }
 };
 
@@ -38,7 +38,7 @@ ClientRequest.prototype.end = function _end(data) {
     if (this.ws.readyState === WebSocket.OPEN){
         let buf = str2ab(request);
         let str = ab2str(buf);
-        this.ws.send(buf);
+        this.ws.send(request);
         this.req.resetBody();
     }
     else
@@ -46,3 +46,7 @@ ClientRequest.prototype.end = function _end(data) {
         throw new Error('Socket not opened');
     }
 };
+
+ClientRequest.prototype.getHeaders = function () {
+    return this.req.getHeaders();
+}

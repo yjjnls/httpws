@@ -101,7 +101,7 @@ IncomingMessage.prototype.parseFirstLine = function _parseFirstLine(firstLine){
     this.statusMessage = field[2];
 
   } else if (0 == field[2].indexOf('HTTP/1.')){//request
-    
+
     this.httpVersion = field[2];
     this.url    = field[1];
     this.method = field[0];
@@ -124,7 +124,7 @@ IncomingMessage.prototype.parse = function _parse(content){
 
   while( true){
     var n = content.indexOf(crlf);
-    
+
 
     if( n == -1 ){
       console.log('invalid http message',content);
@@ -145,10 +145,13 @@ IncomingMessage.prototype.parse = function _parse(content){
 
     var field = trim(line,0,m);
     var value = trim(line,m+1);
+    if( field === 'CSeq'){
+      value = parseInt(value);
+    }
     this._addHeaderLine( field, value, this.headers );
     content = content.slice(n+2);
   }
-  
+
 }
 
 /*

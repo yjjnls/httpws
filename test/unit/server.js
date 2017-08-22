@@ -105,16 +105,16 @@ function OnEcho(req,res){
         }
         console.log('receive data\n',data);
     });
-    
+
     req.on('end',function(){
 
         var content={
-            headers: JSON.stringify(req.headers,null,2),
+            headers: JSON.stringify(req.headers),
             body
         }
 
         res.write(JSON.stringify(content,null,2));
-        
+
         res.end();
 
     });

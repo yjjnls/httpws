@@ -115,13 +115,14 @@ function ServerResponse(req) {
   this.sendDate = true;
   this._sent100 = false;
   this._expect_continue = false;
+  this._cseq = req.headers['cseq'];
 
   if (req.httpVersionMajor < 1 || req.httpVersionMinor < 1) {
     this.useChunkedEncodingByDefault = chunkExpression.test(req.headers.te);
     this.shouldKeepAlive = false;
   }
-  this.setHeader('CSeq',req.headers['cseq'] || 0)
   this.socket = req.socket;
+  this.setHeader('CSeq',req.headers['cseq']);
 }
 
 util.inherits(ServerResponse, OutgoingMessage);
@@ -264,7 +265,7 @@ ServerResponse.prototype.writeHeader = ServerResponse.prototype.writeHead;
 function Server(requestListener) {
   if (!(this instanceof Server)) return new Server(requestListener);
   events.EventEmitter.call(this);
-  
+
 
   if (requestListener) {
     this.on('request', requestListener);
@@ -366,12 +367,12 @@ Server.prototype.listen = function _listen(options){
       req.emit('close');
     });
   });
+  wss.on('close',function(){
+    if( self.onclose ){
+      self.onclose(ws)
+    }
+  });
 
-  // wss.on('close',function(){
-  //   if( self.onclose ){
-  //     self.onclose(ws)
-  //   } 
-  // });
 };
 
 Server.prototype._onconnection = function _onconnection( server,socket, request ,url2name){
@@ -391,10 +392,10 @@ function _parseIncommingMessage( data ,ws){
   var firstLine = data.slice(0,n).toString();
 
   var fields = firstLine.split(' ');
-  if( fields.length == 3 &&  
-      (0 == fields[0].indexOf("HTTP/1") || 
+  if( fields.length == 3 &&
+      (0 == fields[0].indexOf("HTTP/1") ||
        0 == fields[2].indexOf("HTTP/1"))){
-         
+
        // var incoming = new IncomingMessage( null );
         var incoming = new IncomingMessage( ws );
         if ( incoming.parseFirstLine(fields) &&
@@ -407,11 +408,11 @@ function _parseIncommingMessage( data ,ws){
   return null;
 }
 
-/* 
+/*
 function connectionListener(socket) {
   debug('SERVER new websocket connection');
 
- 
+
 
  httpSocketSetup(socket);
 

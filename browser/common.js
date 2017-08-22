@@ -239,11 +239,14 @@ function normalizeName(name) {
     if (/[^a-z0-9\-#$%&'*+.\^_`|~]/i.test(name)) {
         throw new TypeError('Invalid character in header field name')
     }
-    return name.toLowerCase()
+    return name;
+    return name.toLowerCase();
 }
 
 function normalizeValue(value) {
-    if (typeof value !== 'string') {
+    if (typeof  value === 'number') {
+        return value;
+    } else if (typeof value !== 'string') {
         value = String(value)
     }
     return value
@@ -423,6 +426,10 @@ class Request extends EventEmitter {
 
 
     addBody(body) {
+        if(this.method.toUpperCase() === 'GET')
+        {
+            return;
+        }
         this._initBody(body);
     }
 
@@ -438,6 +445,14 @@ class Request extends EventEmitter {
 
     resetBody() {
         this._resetBody();
+    }
+
+    getHeaders() {
+        let obj = {};
+        for(let [key, value] of this.headers.entries()) {
+            obj[key.toLowerCase()] = value;
+        }
+        return obj;
     }
 }
 
@@ -488,6 +503,10 @@ class Response extends EventEmitter {
     }
 
     addBody(body) {
+        if(this.method.toUpperCase() === 'GET')
+        {
+            return;
+        }
         this._initBody(body);
     }
 
@@ -595,4 +614,24 @@ function isResponse(firstLine) {
     else {
         return false;
     }
+}
+
+function isJSON(str) {
+    if (typeof str == 'string') {
+        try {
+            var obj=JSON.parse(str);if(str.indexOf('{')>-1) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch(e) {
+            console.log(e);
+            return false;
+        }
+    }
+    return false;
+}
+
+function trim(str) {
+    return str.replace(/^(\s|\u00A0)+/,'').replace(/(\s|\u00A0)+$/,'');
 }
