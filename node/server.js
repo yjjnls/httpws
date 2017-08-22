@@ -36,6 +36,8 @@ const httpSocketSetup = common.httpSocketSetup;
 const OutgoingMessage = require('./outgoing').OutgoingMessage;
 const IncomingMessage = require('./incoming').IncomingMessage;
 const outHeadersKey = common.outHeadersKey;
+const isResponse = common.isResponse;
+const isResquest = common.isRequest;
 
 const Agent = require('./agent').Agent;
 const globalAgent = require('./agent').globalAgent;
@@ -298,7 +300,8 @@ Server.prototype.setTimeout = function setTimeout(msecs, callback) {
 
 Server.prototype.listen = function _listen(options){
   this.onconnection=null;
-  this.onclose=null;
+  this.cseqConnection = new Map();
+  this.count = 0;
 
   var self = this;
   var wss = new ws.Server(options);
@@ -318,59 +321,93 @@ Server.prototype.listen = function _listen(options){
       console.log("receive message:\n"+data);
       debug("receive message:\n"+data);
 
-      //the imcoming request send by remote
+
       var incoming = _parseIncommingMessage( data ,ws);
-      if( incoming && incoming.method ){
-
-        var req = incoming;
-        var res = new ServerResponse( incoming );
-        self.emit('request',req,res);
-        if( req._body ){
-          req.emit('data',req._body)
-        }
-        req.emit('end');
-
+      let cseq = incoming.headers['cseq'];
+      if(cseq === undefined) {
+        ws.send('POST /header-notFound@cseq');
+        return;
       }
-      //the incoming response after sending request to remote
-      else if( incoming && incoming.statusCode ){
-        var res = incoming;
-        var id  = res.headers['cseq'];
-        if( !id ){
-          debug('Invalid response message (without CSeq field).');
+
+      let firstLine = data.split(/\r?\n/)[0];
+      if(isResquest(firstLine)) {
+
+          let host = incoming.headers['host'];
+
+          if(host !== undefined) {
+              let hostConn = globalAgent.getConnection(host);
+              if(hostConn) {
+                  self.cseqConnection.set(cseq, ws);
+                  try {
+                      hostConn.socket.send(data);
+                  }
+                  catch (e) {
+                    console.log('Error: ' + e.message);
+                  }
+              } else {
+                  ws.send('POST /Host connection-notFound@'+host);
+                  return;
+              }
+          }
+          else if( incoming && incoming.method ){
+
+              var req = incoming;
+              var res = new ServerResponse( incoming );
+              self.emit('request',req,res);
+              if( req._body ){
+                  req.emit('data',req._body)
+              }
+              req.emit('end');
+
+          }
+          else if( incoming && incoming.statusCode ){
+              var res = incoming;
+              var id  = res.headers['cseq'];
+              if( !id ){
+                  debug('Invalid response message (without CSeq field).');
+                  return;
+              }
+
+              id = Number(id.split(' ')[0]);
+              var c = globalAgent.getConnectionByReqId(id);
+              if( !c){
+                  debug('Invalid response message ( no correspoining request in the pool.');
+                  return;
+              }
+
+              var creq = c.requests[id];
+              if( creq.callback ){
+                  creq.callback( res );
+                  res.emit('data',res._body);
+                  res.emit('end');
+              }
+              delete c.requests[id];
+
+          }
+      } else if(isResponse(firstLine)) {
+        let responseConn = self.cseqConnection.get(cseq);
+        if(responseConn) {
+            responseConn.send(data);
+            self.cseqConnection.delete(cseq);
+        }
+      } else {
+          ws.send('ERROR /incorrectly message');
           return;
-        }
-
-        id = Number(id.split(' ')[0]);
-        var c = globalAgent.getConnectionByReqId(id);
-        if( !c){
-          debug('Invalid response message ( no correspoining request in the pool.');
-          return;
-        }
-
-        var creq = c.requests[id];
-        if( creq.callback ){
-          creq.callback( res );
-          res.emit('data',res._body);
-          res.emit('end');
-        }
-        delete c.requests[id];
-
       }
+
+      //var incoming = _parseIncommingMessage( data );
+
     });
+
     ws.on('close',function(){
       // console.log('ws close');
       globalAgent.removeConnection(ws);
-      var incoming = new IncomingMessage( ws );
+/*      var incoming = new IncomingMessage( ws );
       var req = incoming;
       var res = new ServerResponse( incoming );
       self.emit('request',req,res);
-      req.emit('close');
+      req.emit('close');*/
     });
-  });
-  wss.on('close',function(){
-    if( self.onclose ){
-      self.onclose(ws)
-    }
   });
 
 };

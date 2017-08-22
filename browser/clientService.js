@@ -7,4 +7,8 @@ class ClientService extends EventEmitter {
     addRequestListener(requestListener) {
         this.addListener('request', requestListener);
     }
+
+    removeRequestListener(requestListener) {
+        this.removeListener('request', requestListener);
+    }
 }

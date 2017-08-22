@@ -1,10 +1,8 @@
 var wsConnection;
 
-
 const options = {
     hostname: 'localhost',
-    port: 8080,
-    path: '/a'
+    port: 8080
 };
 
 wsConnection = new HttpWsConnection(options);
@@ -24,7 +22,7 @@ wsConnection.onConnected = function () {
         },
         after: function() {
             // clean up once after all tests are done
-            //wsConnection.close();
+            wsConnection.close();
         }
     });
     QUnit.test( "post test", function( assert ) {
@@ -33,7 +31,8 @@ wsConnection.onConnected = function () {
         let headers;
         let msgToSent = 'hello world';
         let request_client = wsConnection.createClientRequest({ method: 'post', path: '/unittest/echo', headers: {
-            date: (new Date()).toGMTString()
+            date: (new Date()).toGMTString(),
+
         }}, res => {
             let content = '';
             let headerStr;
@@ -149,11 +148,3 @@ wsConnection.onConnected = function () {
     });
 
 };
-
-
-
-
-/*wsTunnel.addServiceListener(function (request, response) {
-    console.log(request, response.write('nihao'));
-    response.end(' baibai')
-});*/

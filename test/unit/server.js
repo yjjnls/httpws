@@ -9,7 +9,7 @@ const server = http.createServer(function (req, res) {
 
     let root = path.resolve(process.argv[2] || '.');
 
-    console.log('Static root dir: ' + root);
+    //console.log('Static root dir: ' + root);
 
     let filepath = 'test/unit/index.html';
 
@@ -85,6 +85,9 @@ httpws.createServer( function( req, res){
 
     if( startWith(req.url,'/unittest/echo')){
         OnEcho( req,res);
+    }
+    else if(startWith(req.url,'/unittest/peerecho')) {
+        OnPeerEcho(req, res);
     }
     else {
         res.statusCode = 404;
