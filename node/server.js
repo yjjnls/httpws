@@ -124,7 +124,7 @@ function ServerResponse(req) {
     this.shouldKeepAlive = false;
   }
   this.socket = req.socket;
-  this.setHeader('CSeq',req.headers['cseq']);
+  this.setHeader('CSeq',req.headers['cseq'] ? req.headers['cseq'] : 1);
 }
 
 util.inherits(ServerResponse, OutgoingMessage);
@@ -402,11 +402,11 @@ Server.prototype.listen = function _listen(options){
     ws.on('close',function(){
       // console.log('ws close');
       globalAgent.removeConnection(ws);
-/*      var incoming = new IncomingMessage( ws );
+      var incoming = new IncomingMessage( ws );
       var req = incoming;
       var res = new ServerResponse( incoming );
       self.emit('request',req,res);
-      req.emit('close');*/
+      req.emit('close');
     });
   });
 

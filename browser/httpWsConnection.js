@@ -84,7 +84,7 @@ function onMessage(event) {
     let str;
     if (typeof event.data === 'string') {
         str = event.data;
-        console.log('onMessage:\r\n' + event.data);
+        //console.log('onMessage:\r\n' + event.data);
     } else if (event.data instanceof ArrayBuffer) {
         let buffer = event.data;
         str = ab2str(buffer);
