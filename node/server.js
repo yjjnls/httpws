@@ -309,7 +309,7 @@ Server.prototype.listen = function _listen(options){
   wss.on('connection', function( ws, request  ){
 
     var onconnection = self.onconnection || self._onconnection;
-    console.log(self.onconnection,"--",self._onconnection);
+    // console.log(self.onconnection,"--",self._onconnection);
     if( !onconnection(self,ws,request)){
       debug('connection repeted at',request.url);
       ws.send('POST /connection-repeated@'+request.url);
@@ -318,7 +318,7 @@ Server.prototype.listen = function _listen(options){
     }
 
     ws.on('message',function(data,flags){
-      console.log("receive message:\n"+data);
+      // console.log("receive message:\n"+data);
       debug("receive message:\n"+data);
 
 
@@ -329,7 +329,7 @@ Server.prototype.listen = function _listen(options){
         return;
       }
 
-      let firstLine = data.split(/\r?\n/)[0];
+      let firstLine = data.toString().split(/\r?\n/)[0];
       if(isResquest(firstLine)) {
 
           let host = incoming.headers['host'];
