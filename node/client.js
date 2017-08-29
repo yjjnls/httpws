@@ -112,7 +112,7 @@ function ClientRequest(options, cb) {
     if (options.hostname !== null && !options.hostname) {
       throw new Error('ERR_INVALID_DOMAIN_NAME');
     }
-    console.log('ClientRequest options:',options);
+    // console.log('ClientRequest options:',options);
   }   else {
     options = util._extend({}, options);
     if( !options.host){
