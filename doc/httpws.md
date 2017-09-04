@@ -15,21 +15,34 @@ Endpoints deploy in intranet, will interactive with another one via Proxy (on in
 
 A question here is how do Enpoint1 send request to Endpoint2, since IP addres of Endpint2 is unvisiable(or not unique). Current solution is to manage the virtual address by Proxy. for example, Endpoint2 connect to Proxy by ws://Proxy.ip/Endpoint2address, the Proxy will record the connection and mark his virtual adress as 'Endpoint2address'.Thus Endpoint1 will be able to access Endpoint2 with 'Endpoint2adress' by simply put the 'Endpoint2address' in http header host.
 
-There will be 2 kinds of message exchanged in websocket, HTTP(RFC 2616) which is the leading role and WS-Indication which use to notify client status or some exception.
+HTTP message eclonsed in websocket message. Large HTTP message may split to several chunk via WS message. the WS message format as below.
+```
+WS-Message = command-line  CRLF payload
 
-httpws message package define
+command-line    = ":" cmmand-type SP sequence-number ( chunk-number )
+command-type    = "request" | "response" | "message"
+sequence-number = 1*OCTET 
+chunk-number    = 1*OCTET 
 
-`message-line  CRLF payload `
-message-line describe what payload is. syntax 
+paylaod         =  HTTP-message | ext-message
 
-message-line:
-:(request|response) `sequence-id` continue
-request and response indicate the paylaod is HTTP request line or status line, The sequence id is used to paire the request and response. If http message is send by trunck 'continue' will be add untill the last one. for now chunk is not supported.
+HTTP-message    = see RFC261
 
+ext-message     = may (to be define)
+```
 
-:error
-{
-    "errno": 409, //use HTTP status code
-    "reason":'Conflict',
-    "appinfo":"Only one connect permmition IP alreay connected."
-}
+* HTTP-message  </p>
+  see RFC2616 [http://www.ietf.org/rfc/rfc2616.txt]
+  </p>
+
+* command-line </p> indicate what's the payload type websocket message </p>
+
+* command-type 
+  </p>
+   request  is the http Request message
+
+   response is the http Response message
+
+   message indicate 
+</p>
+
