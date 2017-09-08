@@ -23,20 +23,20 @@
 
 const util = require('util');
 const EventEmitter = require('events').EventEmitter
+/* TODEL:
+function readStart(socket) {
+  if (socket && !socket._paused && socket.readable)
+    socket.resume();
+}
 
-//-- function readStart(socket) {
-//--   if (socket && !socket._paused && socket.readable)
-//--     socket.resume();
-//-- }
-//-- 
-//-- function readStop(socket) {
-//--   if (socket)
-//--     socket.pause();
-//-- }
-
+function readStop(socket) {
+  if (socket)
+    socket.pause();
+}
+*/
 /* Abstract base class for ServerRequest and ClientResponse. */
-function IncomingMessage(socket) {
-  Stream.Readable.call(this);
+function IncomingMessage(connection) {
+  EventEmitter.call(this);
 
   // Set this to `true` so that stream.Readable won't attempt to read more
   // data on `IncomingMessage#push` (see `maybeReadMore` in
@@ -45,8 +45,8 @@ function IncomingMessage(socket) {
   // haven't attempted to read.
   this._readableState.readingMore = true;
 
-  this.socket = socket;
-  this.connection = socket;
+//  this.socket = socket;
+  this.connection = connection;
 
   this.httpVersionMajor = null;
   this.httpVersionMinor = null;
@@ -76,10 +76,18 @@ function IncomingMessage(socket) {
   // flag for when we decide that this message cannot possibly be
   // read by the user, so there's no point continuing to handle it.
   this._dumped = false;
+
+  this.push = function(data){
+    if( data === null ){
+      this.emit('end');
+    } else {
+      this.emit('data',data);
+    }
+  }
 }
 util.inherits(IncomingMessage, EventEmitter);
 
-
+/* TODEL:
 IncomingMessage.prototype.setTimeout = function setTimeout(msecs, callback) {
   if (callback)
     this.on('timeout', callback);
@@ -113,7 +121,7 @@ IncomingMessage.prototype.destroy = function destroy(error) {
   if (this.socket)
     this.socket.destroy(error);
 };
-
+*/
 
 IncomingMessage.prototype._addHeaderLines = _addHeaderLines;
 function _addHeaderLines(headers, n) {
@@ -308,7 +316,7 @@ function _addHeaderLine(field, value, dest) {
   }
 }
 
-
+/* TODEL:
 // Call this instead of resume() if we want to just
 // dump all the data to /dev/null
 IncomingMessage.prototype._dump = function _dump() {
@@ -320,9 +328,11 @@ IncomingMessage.prototype._dump = function _dump() {
     this.resume();
   }
 };
-
+*/
 module.exports = {
   IncomingMessage,
-//--  readStart,
-//--  readStop
+/* TODEL:  
+  readStart,
+  readStop
+*/
 };

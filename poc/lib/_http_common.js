@@ -145,9 +145,10 @@ function parserOnMessageComplete() {
     // For emit end event
     stream.push(null);
   }
-
-  //-- // force to read the next incoming message
-  //-- readStart(parser.socket);
+/* TODEL:
+  // force to read the next incoming message
+  readStart(parser.socket);
+*/  
 }
 
 
@@ -213,11 +214,12 @@ function freeParser(parser, req, socket) {
   }
 }
 
-
-//-- function httpSocketSetup(socket) {
-//--   socket.removeListener('drain', ondrain);
-//--   socket.on('drain', ondrain);
-//-- }
+/* TODEL:
+ function httpSocketSetup(socket) {
+   socket.removeListener('drain', ondrain);
+   socket.on('drain', ondrain);
+ }
+*/
 
 /**
  * Verifies that the given val is a valid HTTP token
