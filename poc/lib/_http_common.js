@@ -10,10 +10,10 @@
 const binding = require('./http_parser');
 const methods = binding.methods;
 const HTTPParser = binding.HTTPParser;
-const FreeList = require('internal/freelist');
+const FreeList = require('./freelist');
 //-- const ondrain = require('internal/http').ondrain;
-const incoming = require('_http_incoming');
-const emitDestroy = require('async_hooks').emitDestroy;
+const incoming = require('./_http_incoming');
+const emitDestroy = require('./async_hooks').emitDestroy;
 const IncomingMessage = incoming.IncomingMessage;
 //-- const readStart = incoming.readStart;
 //-- const readStop = incoming.readStop;
@@ -59,7 +59,7 @@ function parserOnHeadersComplete(versionMajor, versionMinor, headers, method,
     parser._url = '';
   }
 
-  parser.incoming = new IncomingMessage(parser.socket);
+  parser.incoming = new IncomingMessage(parser.connection);
   parser.incoming.httpVersionMajor = versionMajor;
   parser.incoming.httpVersionMinor = versionMinor;
   parser.incoming.httpVersion = versionMajor + '.' + versionMinor;

@@ -6,7 +6,7 @@ const HTTPParser = binding.HTTPParser;
 
 const EventEmitter = require('events').EventEmitter;
 const assert = require('assert').ok;
-const common = require('_http_common');
+const common = require('./_http_common');
 const parsers = common.parsers;
 const freeParser = common.freeParser;
 const debug = common.debug;
@@ -32,7 +32,8 @@ class Connection extends EventEmitter {
             }
         });
 
-        this.app =app;
+        this.socket=socket;
+        this.app =app;        
         this.requests={};//service recive request
 
     }
@@ -147,7 +148,7 @@ function parserOnIncoming(app, socket, state, req, keepAlive) {
         res.end();
       }
     }
-  } else {
+  } else {    
     app.emit('request', req, res);
   }
   return false; // Not a HEAD response. (Not even a response!)

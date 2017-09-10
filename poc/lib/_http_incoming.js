@@ -43,9 +43,10 @@ function IncomingMessage(connection) {
   // `_stream_readable.js`). This is important for proper tracking of
   // `IncomingMessage#_consuming` which is used to dump requests that users
   // haven't attempted to read.
-  this._readableState.readingMore = true;
+//  this._readableState.readingMore = true;
 
-//  this.socket = socket;
+  var socket = connection.socket;
+  this.socket = socket;
   this.connection = connection;
 
   this.httpVersionMajor = null;
@@ -81,6 +82,7 @@ function IncomingMessage(connection) {
     if( data === null ){
       this.emit('end');
     } else {
+      console.log(this.headers);
       this.emit('data',data);
     }
   }
